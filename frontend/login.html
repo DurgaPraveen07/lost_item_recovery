@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIET Portal - Login</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: url('page_bg.png');
+            background-repeat: repeat;
+            background-attachment: fixed;
+        }
+
+        /* ── Header banner ── */
+        .login-header-banner {
+            width: 100%;
+            background: #333333;
+            border-bottom: 2.5px solid #8B0000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .login-header-banner img {
+            width: 100%;
+            max-width: 1400px;
+            height: auto;
+            display: block;
+        }
+
+        /* ── Center container ── */
+        .auth-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+        }
+
+        /* ── Card (no border / shadow — transparent look) ── */
+        .login-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        /* ── Red circle icon ── */
+        .user-icon-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #e53935;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 18px;
+            box-shadow: 0 4px 16px rgba(229,57,53,0.35);
+        }
+        .user-icon-circle i {
+            font-size: 2.2rem;
+            color: #fff;
+        }
+
+        /* ── Title ── */
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 28px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Tab row ── */
+        .tab-row {
+            display: flex;
+            width: 100%;
+            gap: 8px;
+            margin-bottom: 22px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px 0;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+            background: rgba(0,0,0,0.12);
+            color: #444;
+        }
+        .tab-btn.active {
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        /* ── Pill inputs ── */
+        .input-pill {
+            width: 100%;
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .input-pill i {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 1rem;
+        }
+        .input-pill input {
+            width: 100%;
+            padding: 15px 20px 15px 48px;
+            border: none;
+            border-radius: 50px;
+            background: #fff;
+            font-size: 1rem;
+            color: #333;
+            outline: none;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+            font-family: inherit;
+        }
+        .input-pill input::placeholder {
+            color: #aaa;
+        }
+        .input-pill input:focus {
+            box-shadow: 0 0 0 3px rgba(229,57,53,0.2), 0 1px 4px rgba(0,0,0,0.1);
+        }
+
+        /* ── Login button ── */
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 50px;
+            background: #1a1a1a;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 1px;
+            margin-top: 6px;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .login-btn:hover {
+            background: #333;
+        }
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ── Hint text ── */
+        .hint-box {
+            margin-top: 22px;
+            font-size: 0.88rem;
+            color: #555;
+            text-align: center;
+            line-height: 1.6;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2E8B57;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: bottom 0.3s ease;
+            z-index: 2000;
+            white-space: nowrap;
+        }
+        .toast.show { bottom: 30px; }
+    </style>
+</head>
+<body>
+
+    <!-- College Banner -->
+    <header class="login-header-banner">
+        <img src="banner.png" alt="Dhanekula College Official Banner">
+    </header>
+
+    <div class="auth-container">
+        <div class="login-card">
+
+            <!-- Red user icon -->
+            <div class="user-icon-circle">
+                <i class="fas fa-user"></i>
+            </div>
+
+            <!-- Title -->
+            <h1 class="login-title">Member Login</h1>
+
+            <!-- Student / Admin tabs -->
+            <div class="tab-row">
+                <button class="tab-btn active" id="tabStudent" onclick="switchTab('student')">Student</button>
+                <button class="tab-btn" id="tabAdmin" onclick="switchTab('admin')">Admin</button>
+            </div>
+
+            <!-- Form -->
+            <form id="loginForm" style="width:100%;">
+                <div class="input-pill">
+                    <i class="fas fa-user" id="emailIcon"></i>
+                    <input type="text" id="loginEmail" required placeholder="Username" autocomplete="username">
+                </div>
+                <div class="input-pill">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="loginPassword" required placeholder="Password" autocomplete="current-password">
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+
+            <div class="hint-box" id="hintBox">
+                Use your college email &amp; <b>student@123</b>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = "https://fkikwbnnrvojvvdcdieg.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZraWt3Ym5ucnZvanZ2ZGNkaWVnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NjUxMzksImV4cCI6MjA4ODU0MTEzOX0.FipeIG8H31yQdQYXy0xNEbOJ7KOtbC0fnLKSNMmIo7c";
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentRole = 'student';
+
+        function switchTab(role) {
+            currentRole = role;
+            document.getElementById('tabStudent').classList.toggle('active', role === 'student');
+            document.getElementById('tabAdmin').classList.toggle('active', role === 'admin');
+
+            const emailIcon  = document.getElementById('emailIcon');
+            const emailInput = document.getElementById('loginEmail');
+            const passInput  = document.getElementById('loginPassword');
+            const hintBox    = document.getElementById('hintBox');
+
+            if (role === 'admin') {
+                emailIcon.className  = 'fas fa-user-shield';
+                emailInput.placeholder = 'Admin ID  (e.g. admin@2009)';
+                passInput.placeholder  = 'Password';
+                hintBox.innerHTML      = '<p>Use your official admin credentials.</p>';
+            } else {
+                emailIcon.className  = 'fas fa-user';
+                emailInput.placeholder = 'Username';
+                passInput.placeholder  = 'Password';
+                hintBox.innerHTML      = 'Use your college email &amp; <b>student@123</b>';
+            }
+        }
+
+        function showToast(msg, success = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.background = success ? '#2E8B57' : '#8B0000';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email    = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (currentRole === 'admin') {
+                // Admin login is hardcoded for security
+                if (email === 'admin@2009' && password === 'lost@2009') {
+                    const user = { id: 'admin-diet', email: 'admin@diet.ac.in', name: 'System Admin', role: 'admin' };
+                    localStorage.setItem('diet_user', JSON.stringify(user));
+                    showToast('✅ Admin Access Granted', true);
+                    setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                } else {
+                    showToast('❌ Invalid Admin Credentials');
+                }
+            } else {
+                if (!email.endsWith('@diet.ac.in')) {
+                    showToast('❌ Please use your college @diet.ac.in email');
+                    return;
+                }
+
+                // ── STRATEGY: Flask backend first, Supabase as fallback ──
+                let loggedIn = false;
+
+                // 1️⃣ Try Flask backend (/api/auth) — handles registration + users.json sync
+                try {
+                    const response = await fetch('/api/auth', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password }),
+                        signal: AbortSignal.timeout(4000)   // 4-second timeout
+                    });
+
+                    if (response.ok || response.status === 201) {
+                        const result = await response.json();
+                        if (result.success && result.user) {
+                            localStorage.setItem('diet_user', JSON.stringify(result.user));
+                            showToast(`✅ ${result.message || 'Login Successful'}`, true);
+                            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                            loggedIn = true;
+                        } else if (result.error) {
+                            // Flask is reachable but auth failed (wrong password, etc.)
+                            showToast('❌ ' + result.error);
+                            loggedIn = true;   // mark as handled (don't fall through)
+                        }
+                    } else {
+                        const result = await response.json().catch(() => ({}));
+                        showToast('❌ ' + (result.error || 'Access denied'));
+                        loggedIn = true;   // Flask responded — error is final
+                    }
+                } catch (flaskErr) {
+                    // Flask unreachable (not running locally / network error) — fall through
+                    console.warn('Flask backend unavailable, falling back to Supabase:', flaskErr.message);
+                }
+
+                // 2️⃣ Supabase fallback (when Flask is not running / Vercel cold-start)
+                if (!loggedIn) {
+                    try {
+                        const { data: profiles, error } = await _supabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('email', email)
+                            .limit(1);
+
+                        if (error) throw error;
+
+                        if (profiles && profiles.length > 0) {
+                            const profile = profiles[0];
+                            if (profile.password === password) {
+                                localStorage.setItem('diet_user', JSON.stringify(profile));
+                                showToast('✅ Login Successful (Supabase)', true);
+                                setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                            } else {
+                                showToast('❌ Invalid password. Try your registered password.');
+                            }
+                        } else {
+                            // Auto-register new user directly in Supabase
+                            if (password === 'student@123') {
+                                const newUserId = crypto.randomUUID ? crypto.randomUUID() : Date.now().toString();
+                                const newUser = {
+                                    id: newUserId,
+                                    email: email,
+                                    name: email.split('@')[0].toUpperCase(),
+                                    role: 'student',
+                                    password: 'student@123'
+                                };
+                                const { data: inserted, error: insertErr } = await _supabase
+                                    .from('profiles')
+                                    .insert([newUser])
+                                    .select();
+
+                                if (insertErr) throw new Error(insertErr.message);
+
+                                const savedUser = (inserted && inserted[0]) || newUser;
+                                localStorage.setItem('diet_user', JSON.stringify(savedUser));
+                                showToast('✅ Registered successfully! Please update your profile.', true);
+                                setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+                            } else {
+                                showToast('❌ Account not found. Use default password student@123 to register.');
+                            }
+                        }
+                    } catch (sbErr) {
+                        console.error('Supabase Auth Error:', sbErr);
+                        showToast('❌ Connection error: ' + sbErr.message);
+                    }
+                }
+            }
+        });
+
+        // Redirect if already logged in
+        if (localStorage.getItem('diet_user')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
+</body>
+</html>

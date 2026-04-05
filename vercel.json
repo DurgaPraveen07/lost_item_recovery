@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "backend/app.py",
+      "use": "@vercel/python"
+    },
+    {
+      "src": "frontend/*.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "frontend/*.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "frontend/*.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "frontend/*.png",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "backend/app.py"
+    },
+    {
+      "src": "/main.js",
+      "dest": "frontend/main.js"
+    },
+    {
+      "src": "/styles.css",
+      "dest": "frontend/styles.css"
+    },
+    {
+      "src": "/banner.png",
+      "dest": "frontend/banner.png"
+    },
+    {
+      "src": "/login.html",
+      "dest": "frontend/login.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/index.html"
+    }
+  ],
+  "env": {
+    "PYTHON_VERSION": "3.9"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "sync_test@diet.ac.in": {
+    "id": "student-1774165668385",
+    "email": "sync_test@diet.ac.in",
+    "name": "SYNC_TEST",
+    "role": "student",
+    "password": "student@123",
+    "mobile": "9876543210",
+    "roll": "21X41A0501",
+    "branch": "CSE",
+    "section": "A",
+    "year": "1st Year",
+    "gender": "Male"
+  },
+  "248t1a0508@diet.ac.in": {
+    "id": "student-1774196176833",
+    "email": "248t1a0508@diet.ac.in",
+    "name": "248T1A0508",
+    "role": "student",
+    "password": "student@123"
+  },
+  "248t1a0561@diet.ac.in": {
+    "id": "student-1774194321773",
+    "email": "248t1a0561@diet.ac.in",
+    "name": "248T1A0561",
+    "role": "student",
+    "password": "student@123"
+  },
+  "reporter@diet.ac.in": {
+    "id": "student-1774166896657",
+    "email": "reporter@diet.ac.in",
+    "name": "REPORTER",
+    "role": "student",
+    "password": "student@123"
+  },
+  "testuser@diet.ac.in": {
+    "id": "865c9bea-b082-4b26-b011-d63af0fbf1d1",
+    "email": "testuser@diet.ac.in",
+    "name": "TESTUSER",
+    "role": "student",
+    "password": "student@123"
+  },
+  "248t1ao561@diet.ac.in": {
+    "id": "2047f1a5-e977-4fce-9d5f-9906ee8bed51",
+    "email": "248t1ao561@diet.ac.in",
+    "name": "248T1AO561",
+    "role": "student",
+    "password": "student@123"
+  },
+  "248110561@diet.ac.in": {
+    "id": "205b5b9e-ef8b-445e-b1e7-1c4d1974bace",
+    "email": "248110561@diet.ac.in",
+    "name": "248110561",
+    "role": "student",
+    "password": "student@123"
+  }
+}

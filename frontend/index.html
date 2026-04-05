@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIET - Lost & Found Admin System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.1/dist/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="banner_data.js"></script>
+</head>
+<body>
+    <div class="background-container"></div>
+    
+    <header style="width: 100%; border-bottom: 2px solid var(--primary-color); background: #333333; display: flex; justify-content: center; align-items: center;">
+        <img src="banner.png" alt="Dhanekula College Official Banner" style="width: 100%; max-width: 1400px; height: auto; display: block; object-fit: contain;">
+    </header>
+
+    <nav class="navbar glass">
+        <div class="logo">
+            <!-- Logo text removed; banner handles branding -->
+        </div>
+        <ul class="nav-links" id="navbarLinks">
+            <li><a href="#" class="active" onclick="toggleAdmin(false)">Dashboard</a></li>
+            <li><a href="#" onclick="openModal('lostModal')">Report Lost</a></li>
+            <li><a href="#" onclick="openModal('foundModal')">Report Found</a></li>
+            <li><a href="#" onclick="openProfile()"><i class="fas fa-user-circle"></i> Profile</a></li>
+            <li><a href="#" onclick="openInbox()" class="nav-link-wrapper"><i class="fas fa-envelope"></i> Messages <span id="msgBadge" class="badge">0</span></a></li>
+            <li><a href="#" id="adminNavLink" class="admin-btn" onclick="toggleAdmin(true)" style="display: none;">Admin Portal</a></li>
+            <li><a href="#" onclick="logout()" style="color: #e74c3c; font-weight: bold;"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+        </ul>
+        <div class="mobile-menu-btn">
+            <i class="fas fa-bars"></i>
+        </div>
+    </nav>
+
+
+
+
+
+    <main class="container" id="mainApp" style="display: flex; flex-direction: column;">
+        <!-- Hero section -->
+        <section class="hero glass-card pop-in">
+            <div class="hero-content">
+                <h1>Lost Something? Found Something?</h1>
+                <p>A centralized platform for matching lost property to its rightful owners at Dhanekula Institute.</p>
+                <div class="action-buttons">
+                    <button class="btn btn-primary pulse-hover" onclick="openModal('lostModal')">
+                        <i class="fas fa-search"></i> I Lost an Item
+                    </button>
+                    <button class="btn btn-secondary slide-hover" onclick="openModal('foundModal')">
+                        <i class="fas fa-box-open"></i> I Found an Item
+                    </button>
+                    <button class="btn pulse-hover" style="background: #e74c3c; color: white; border-color: #e74c3c;" onclick="openModal('idCardModal')">
+                        <i class="fas fa-id-badge"></i> Urgent: ID Found
+                    </button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <i class="fas fa-hand-holding-heart hero-icon"></i>
+            </div>
+        </section>
+
+        </section>
+
+        <!-- Stats section -->
+        <section class="stats-grid stagger-in">
+            <div class="stat-card glass-card">
+                <div class="stat-icon-wrapper lost-icon">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <h3>Lost Reports</h3>
+                <p class="stat-number" id="lostCount">0</p>
+                <span class="stat-trend">Live Data</span>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon-wrapper found-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3>Items Found</h3>
+                <p class="stat-number" id="foundCount">0</p>
+                <span class="stat-trend">Live Data</span>
+            </div>
+            <div class="stat-card glass-card">
+                <div class="stat-icon-wrapper recovered-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h3>Happily Recovered</h3>
+                <p class="stat-number" id="recoveredCount">0</p>
+                <span class="stat-trend">Live Data</span>
+            </div>
+        </section>
+
+        <!-- Recent Items -->
+        <section class="recent-items glass-card fade-in">
+            <div class="section-header">
+                <h2>Recently Reported Items</h2>
+                <div class="filter-pills">
+                    <span class="pill active" onclick="filterItems('all', this)">All</span>
+                    <span class="pill" onclick="filterItems('lost', this)">Lost</span>
+                    <span class="pill" onclick="filterItems('found', this)">Found</span>
+                    <span class="pill" onclick="filterItems('my_reports', this)" style="border-color: var(--accent-color); color: var(--accent-color);"><i class="fas fa-user-tag"></i> My Posts</span>
+                </div>
+            </div>
+            <div class="items-list" id="itemsContainer">
+                <div style="text-align: center; padding: 20px; color: black;">Loading items from database...</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Admin Dashboard -->
+    <main class="container" id="adminDashboard" style="display: none; flex-direction: column;">
+        <section class="section-header">
+            <h2><i class="fas fa-chart-line"></i> Admin Analytics Dashboard</h2>
+            <button class="btn btn-outline" onclick="toggleAdmin()">Back to Main</button>
+        </section>
+        <section class="stats-grid">
+            <div class="stat-card glass-card">
+                <div class="stat-icon-wrapper" style="background: rgba(230, 126, 34, 0.1); color: var(--warning-color);">
+                    <i class="fas fa-stopwatch"></i>
+                </div>
+                <h3>Avg. Recovery Time</h3>
+                <p class="stat-number" id="avgRecoveryTime">0h</p>
+                <span class="stat-trend" style="color: black;">From reported to resolved</span>
+            </div>
+        </section>
+        <section class="recent-items glass-card" style="margin-top: 20px;">
+            <h3><i class="fas fa-search"></i> Query Official Receipt</h3>
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+                <input type="text" id="adminReceiptSearch" placeholder="e.g. REC-20260321-14" style="flex: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 4px; font-family: monospace; font-size: 1rem; outline: none; background: #F7D37D; color: black;">
+                <button class="btn btn-primary" onclick="searchReceipt()"><i class="fas fa-search"></i> Search Vault</button>
+            </div>
+            <div id="adminReceiptResult" style="margin-top: 20px; display: none; padding: 15px; background: transparent; border-radius: 8px; border-left: 4px solid var(--secondary-color); color: black;">
+                <!-- Results injected here -->
+            </div>
+        </section>
+
+        <section class="recent-items glass-card" style="margin-top: 20px;">
+            <h3><i class="fas fa-users"></i> Registered Users Directory</h3>
+            <div style="overflow-x: auto; margin-top: 15px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border-color); color: var(--secondary-color);">
+                            <th style="padding: 10px;">Name</th>
+                            <th style="padding: 10px;">Roll Number</th>
+                            <th style="padding: 10px;">Official Email</th>
+                            <th style="padding: 10px;">Branch</th>
+                            <th style="padding: 10px;">Year</th>
+                            <th style="padding: 10px;">Gender</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registeredUsersTable">
+                        <tr><td colspan="6" style="text-align: center; padding: 15px; color: black;">Loading users...</td></tr>
+                    </tbody>
+                </table>
+                <p id="totalUsersCount" style="margin-top: 15px; text-align: right; font-weight: bold; color: var(--secondary-color);"></p>
+            </div>
+        </section>
+
+        <section class="recent-items glass-card" style="margin-top: 20px; border-top: 4px solid var(--primary-color);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <h3 style="margin:0;"><i class="fas fa-table"></i> All Reported Items — Live Data Table</h3>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <input type="text" id="itemsTableSearch" onkeyup="filterItemsTable()" placeholder="Search items..." style="padding:8px 14px; border:1px solid var(--border-color); border-radius:20px; font-size:0.9rem; outline:none; background:#F7D37D; color:black; width:200px;">
+                    <select id="itemsTableTypeFilter" onchange="filterItemsTable()" style="padding:8px 12px; border:1px solid var(--border-color); border-radius:20px; font-size:0.9rem; background:#F7D37D; color:black; outline:none;">
+                        <option value="all">All Types</option>
+                        <option value="lost">Lost Only</option>
+                        <option value="found">Found Only</option>
+                    </select>
+                    <select id="itemsTableStatusFilter" onchange="filterItemsTable()" style="padding:8px 12px; border:1px solid var(--border-color); border-radius:20px; font-size:0.9rem; background:#F7D37D; color:black; outline:none;">
+                        <option value="all">All Status</option>
+                        <option value="open">Open</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                    <button class="btn btn-outline" onclick="renderItemsTable()" style="padding:8px 14px; font-size:0.85rem;"><i class="fas fa-sync-alt"></i> Refresh</button>
+                </div>
+            </div>
+            <div style="overflow-x:auto; margin-top:15px;">
+                <table id="itemsDataTable" style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+                    <thead>
+                        <tr style="background:rgba(139,0,0,0.08); border-bottom:2px solid var(--primary-color);">
+                            <th style="padding:10px 8px; text-align:left; color:var(--primary-color); white-space:nowrap;">#ID</th>
+                            <th style="padding:10px 8px; text-align:left; color:var(--primary-color);">Type</th>
+                            <th style="padding:10px 8px; text-align:left; color:var(--primary-color);">Item Name</th>
+                            <th style="padding:10px 8px; text-align:left; color:var(--primary-color);">Category</th>
+                            <th style="padding:10px 8px; text-align:left; color:var(--primary-color);">Location</th>
+                            <th style="padding:10px 8px; text-align:left; color:var(--primary-color);">Date</th>
+                            <th style="padding:10px 8px; text-align:left; color:var(--primary-color);">Reporter</th>
+                            <th style="padding:10px 8px; text-align:left; color:var(--primary-color);">Status</th>
+                            <th style="padding:10px 8px; text-align:left; color:var(--primary-color);">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itemsTableBody">
+                        <tr><td colspan="9" style="text-align:center; padding:20px; color:#777;">Loading items...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p id="itemsTableCount" style="margin-top:10px; text-align:right; font-size:0.85rem; color:#666;"></p>
+        </section>
+
+        <section class="recent-items glass-card" style="margin-top: 20px;">
+            <h3><i class="fas fa-users"></i> Registered Users Directory</h3>
+            <div style="overflow-x: auto; margin-top: 15px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.95rem;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid var(--border-color); color: var(--secondary-color);">
+                            <th style="padding: 10px;">Name</th>
+                            <th style="padding: 10px;">Roll Number</th>
+                            <th style="padding: 10px;">Official Email</th>
+                            <th style="padding: 10px;">Branch</th>
+                            <th style="padding: 10px;">Year</th>
+                            <th style="padding: 10px;">Gender</th>
+                        </tr>
+                    </thead>
+                    <tbody id="registeredUsersTable">
+                        <tr><td colspan="6" style="text-align: center; padding: 15px; color: black;">Loading users...</td></tr>
+                    </tbody>
+                </table>
+                <p id="totalUsersCount" style="margin-top: 15px; text-align: right; font-weight: bold; color: var(--secondary-color);"></p>
+            </div>
+        </section>
+
+        <section class="recent-items glass-card" style="margin-top: 20px; border-top: 4px solid var(--success-color);">
+            <h3><i class="fas fa-shield-alt"></i> Secure Communication Logs (Messages)</h3>
+            <div id="adminMessagesFeed" style="margin-top: 15px; max-height: 400px; overflow-y: auto; padding: 10px; background: rgba(0,0,0,0.02); border-radius: 8px;">
+                <p style="text-align: center; color: #777; padding: 20px;">Fetching secure messages...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modals for reporting -->
+    <div id="lostModal" class="modal">
+        <div class="modal-content glass-card form-pop">
+            <span class="close" onclick="closeModal('lostModal')">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon lost-icon-modal"><i class="fas fa-search"></i></div>
+                <h2>Report Lost Item</h2>
+            </div>
+            <form id="lostForm" onsubmit="submitForm(event, 'lostModal')">
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" required placeholder="e.g. Blue Backpack" class="item-name">
+                </div>
+                <div class="form-row">
+                    <div class="form-group w-50">
+                        <label>Category</label>
+                        <select required class="item-category">
+                            <option value="">Select Category</option>
+                            <option>Electronics</option>
+                            <option>Stationery</option>
+                            <option>Accessories/Wallets</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group w-50">
+                        <label>Date Lost</label>
+                        <input type="date" required class="item-date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Last Seen Location</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" required placeholder="e.g. Block A, Room 102" class="item-location">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description & Unique Marks</label>
+                    <textarea rows="3" placeholder="Provide any identifying details..." required class="item-desc"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Current Status</label>
+                    <select required class="item-status">
+                        <option value="open">Not Resolved (Still Lost)</option>
+                        <option value="resolved">Resolved (Already Recovered)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Upload Image (Optional)</label>
+                    <input type="file" accept="image/*" class="file-input">
+                </div>
+                <button type="submit" class="btn btn-primary submit-btn">Submit Report</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="foundModal" class="modal">
+        <div class="modal-content glass-card form-pop">
+            <span class="close" onclick="closeModal('foundModal')">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon found-icon-modal"><i class="fas fa-box-open"></i></div>
+                <h2>Report Found Item</h2>
+            </div>
+            <form id="foundForm" onsubmit="submitForm(event, 'foundModal')">
+                <div class="form-group">
+                    <label>Item Name</label>
+                    <input type="text" required placeholder="e.g. Scientific Calculator" class="item-name">
+                </div>
+                <div class="form-row">
+                    <div class="form-group w-50">
+                        <label>Category</label>
+                        <select required class="item-category">
+                            <option value="">Select Category</option>
+                            <option>Electronics</option>
+                            <option>Stationery</option>
+                            <option>Accessories/Wallets</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group w-50">
+                        <label>Date Found</label>
+                        <input type="date" required class="item-date">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Found Location</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <input type="text" required placeholder="Where did you find it?" class="item-location">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Handed Over To</label>
+                    <select required class="item-handover">
+                        <option value="">Select Location</option>
+                        <option>Admin Office</option>
+                        <option>Security Desk</option>
+                        <option>Library</option>
+                        <option>Department HOD</option>
+                        <option>Kept with me</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Current Status</label>
+                    <select required class="item-status">
+                        <option value="open">Not Resolved (Still Waiting for Owner)</option>
+                        <option value="resolved">Resolved (Returned to Owner)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-secondary submit-btn">Submit Report</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content glass-card form-pop" style="max-width: 480px;">
+            <span class="close" onclick="closeModal('profileModal')">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon" style="background: rgba(69, 123, 157, 0.1); color: var(--accent-color);"><i class="fas fa-user-circle" style="font-size: 2rem;"></i></div>
+                <h2>My Profile</h2>
+            </div>
+
+            <!-- DISPLAY VIEW -->
+            <div id="profileDisplay">
+                <table style="width: 100%; border-collapse: collapse; font-size: 1rem;">
+                    <tr><td style="padding: 10px 5px; font-weight: 700; color: var(--secondary-color); width: 40%;"><i class="fas fa-user"></i> Name</td><td id="dispName" style="padding: 10px 5px; color: #333;">—</td></tr>
+                    <tr><td style="padding: 10px 5px; font-weight: 700; color: var(--secondary-color);"><i class="fas fa-envelope"></i> Email</td><td id="dispEmail" style="padding: 10px 5px; color: #333;">—</td></tr>
+                    <tr><td style="padding: 10px 5px; font-weight: 700; color: var(--secondary-color);"><i class="fas fa-phone"></i> Mobile</td><td id="dispMobile" style="padding: 10px 5px; color: #333;">—</td></tr>
+                    <tr><td style="padding: 10px 5px; font-weight: 700; color: var(--secondary-color);"><i class="fas fa-id-badge"></i> Roll No</td><td id="dispRoll" style="padding: 10px 5px; color: #333;">—</td></tr>
+                    <tr><td style="padding: 10px 5px; font-weight: 700; color: var(--secondary-color);"><i class="fas fa-code-branch"></i> Branch</td><td id="dispBranch" style="padding: 10px 5px; color: #333;">—</td></tr>
+                    <tr><td style="padding: 10px 5px; font-weight: 700; color: var(--secondary-color);"><i class="fas fa-layer-group"></i> Section</td><td id="dispSection" style="padding: 10px 5px; color: #333;">—</td></tr>
+                    <tr><td style="padding: 10px 5px; font-weight: 700; color: var(--secondary-color);"><i class="fas fa-calendar-alt"></i> Year</td><td id="dispYear" style="padding: 10px 5px; color: #333;">—</td></tr>
+                    <tr><td style="padding: 10px 5px; font-weight: 700; color: var(--secondary-color);"><i class="fas fa-venus-mars"></i> Gender</td><td id="dispGender" style="padding: 10px 5px; color: #333;">—</td></tr>
+                    <tr><td style="padding: 10px 5px; font-weight: 700; color: var(--secondary-color);"><i class="fas fa-lock"></i> Password</td><td id="dispPassword" style="padding: 10px 5px; color: #333;">••••••••</td></tr>
+                </table>
+                <button class="btn btn-primary submit-btn" style="width: 100%; justify-content: center; font-weight: bold; margin-top: 20px;" onclick="toggleProfileEdit(true)">
+                    <i class="fas fa-edit"></i> Edit Profile
+                </button>
+            </div>
+
+            <!-- EDIT VIEW -->
+            <div id="profileEdit" style="display: none;">
+                <form id="profileForm" onsubmit="saveProfile(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="profName" required placeholder="Your Legal Name">
+                    </div>
+                    <div class="form-row" style="display: flex; gap: 15px;">
+                        <div class="form-group w-50">
+                            <label>Mobile Number</label>
+                            <input type="tel" id="profMobile" required placeholder="e.g. 9876543210" pattern="[0-9]{10}">
+                        </div>
+                        <div class="form-group w-50">
+                            <label>Roll Number / ID</label>
+                            <input type="text" id="profRoll" required placeholder="e.g. 21X41A0501">
+                        </div>
+                    </div>
+                    <div class="form-row" style="display: flex; gap: 15px;">
+                        <div class="form-group w-50">
+                            <label>Branch</label>
+                            <select id="profBranch" required>
+                                <option value="">Select Branch</option>
+                                <option>CSE</option>
+                                <option>ECE</option>
+                                <option>EEE</option>
+                                <option>ME</option>
+                                <option>CE</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group w-50">
+                            <label>Section</label>
+                            <input type="text" id="profSection" required placeholder="e.g. A, B, C">
+                        </div>
+                    </div>
+                    <div class="form-row" style="display: flex; gap: 15px;">
+                        <div class="form-group w-50">
+                            <label>Year</label>
+                            <select id="profYear" required>
+                                <option value="">Select Year</option>
+                                <option>1st Year</option>
+                                <option>2nd Year</option>
+                                <option>3rd Year</option>
+                                <option>4th Year</option>
+                            </select>
+                        </div>
+                        <div class="form-group w-50">
+                            <label>Gender</label>
+                            <select id="profGender" required>
+                                <option value="">Select Gender</option>
+                                <option>Male</option>
+                                <option>Female</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email ID</label>
+                        <input type="email" id="profEmail" required readonly style="background: rgba(0,0,0,0.05) !important;">
+                    </div>
+                    <div class="form-group">
+                        <label>Change Password (leave blank to keep current)</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock"></i>
+                            <input type="password" id="profPassword" placeholder="Enter new password">
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button type="button" class="btn btn-secondary" style="flex: 1; justify-content: center;" onclick="toggleProfileEdit(false)">Cancel</button>
+                        <button type="submit" class="btn btn-primary submit-btn" style="flex: 2; justify-content: center; font-weight: bold;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Urgent ID Modal -->
+    <div id="idCardModal" class="modal">
+        <div class="modal-content glass-card form-pop" style="border-top: 5px solid #e74c3c;">
+            <span class="close" onclick="closeModal('idCardModal')">&times;</span>
+            <div class="modal-header">
+                <h2><i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> Urgent: ID Card Found</h2>
+            </div>
+            <p style="margin-bottom: 20px; font-size: 0.95rem; color: black;">
+                Student IDs are critical. Enter the printed Roll Number to automatically ping the student via campus systems!
+            </p>
+            <form id="idCardForm" onsubmit="submitIdFound(event)">
+                <div class="form-group">
+                    <label>Printed Roll Number / ID</label>
+                    <input type="text" id="idRollNumber" required placeholder="e.g. 21X41A0501" style="text-transform: uppercase;">
+                </div>
+                <div class="form-group">
+                    <label>Where is the ID being kept right now?</label>
+                    <input type="text" id="idDropLocation" required placeholder="e.g. Main Library Counter, Security Vault">
+                </div>
+                <button type="submit" class="btn btn-primary submit-btn" style="width: 100%; background: #e74c3c; border-color: #e74c3c;">
+                    <i class="fas fa-satellite-dish"></i> Search Directory & Ping Student
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content glass-card form-pop">
+            <span class="close" onclick="closeModal('detailsModal')">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon details-icon-modal" style="background: rgba(69, 123, 157, 0.1); color: var(--accent-color);"><i class="fas fa-info-circle"></i></div>
+                <h2 id="detailTitle">Item Details</h2>
+            </div>
+            <div id="detailContent" style="font-size: 1.1rem; color: var(--secondary-color); line-height: 1.8;">
+                <!-- dynamic content injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Messaging Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content glass-card form-pop" style="max-width: 450px;">
+            <span class="close" onclick="closeModal('messageModal')">&times;</span>
+            <div class="modal-header">
+                <div class="modal-icon" style="background: rgba(var(--primary-rgb), 0.1); color: var(--primary-color);"><i class="fas fa-paper-plane"></i></div>
+                <h2 id="msgModalItemName">Send Message</h2>
+            </div>
+            <form id="contactForm" onsubmit="handleSendMessage(event)">
+                <input type="hidden" id="msgItemId">
+                <input type="hidden" id="msgReceiverId">
+                <div class="form-group">
+                    <label>Your Message</label>
+                    <textarea id="msgTextarea" rows="4" required placeholder="Write your message..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary submit-btn" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-paper-plane"></i> Send Message
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Inbox Modal -->
+    <div id="inboxModal" class="modal">
+        <div class="modal-content glass-card form-pop" style="max-width: 520px; padding: 0;">
+            <div style="padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center;">
+                <h2 style="margin: 0; font-size: 1.4rem;"><i class="fas fa-inbox" style="color: var(--primary-color);"></i> My Messages</h2>
+                <span class="close" onclick="closeModal('inboxModal')" style="position: static; font-size: 2rem;">&times;</span>
+            </div>
+            
+            <div id="inboxContent" style="padding: 20px;">
+                <div id="threadList" class="inbox-container"></div>
+                <div id="conversationView" style="display: none;">
+                    <button class="btn btn-outline" onclick="showThreadList()" style="margin-bottom: 15px; padding: 5px 12px; font-size: 0.85rem;">
+                        <i class="fas fa-chevron-left"></i> Back to Inbox
+                    </button>
+                    <div id="chatMessages" class="chat-area"></div>
+                    <form id="replyForm" onsubmit="handleReply(event)" style="display: flex; gap: 10px;">
+                        <input type="hidden" id="replyItemId">
+                        <input type="hidden" id="replyReceiverId">
+                        <input type="text" id="replyInput" placeholder="Type a message..." required style="flex: 1; padding: 10px; border-radius: 20px; border: 1px solid #ddd;">
+                        <button type="submit" class="btn btn-primary" style="padding: 0 20px; border-radius: 20px;">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Official Digital Receipt Modal -->
+    <div id="receiptModal" class="modal">
+        <div class="modal-content glass-card form-pop" style="max-width: 500px; text-align: center; font-family: 'Courier New', monospace; padding: 20px;">
+            <span class="close" onclick="closeModal('receiptModal')">&times;</span>
+            <div id="pdfPrintArea" style="padding: 20px; background: white; color: black; border-radius: 8px;">
+                <img src="banner.png" crossorigin="anonymous" alt="Banner" style="width: 100%; max-width: 400px; margin-bottom: 20px; display: block; margin-left: auto; margin-right: auto;">
+                <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success-color); margin-bottom: 1rem; display: block; text-align: center;"></i>
+                <h2 style="color: black; font-family: inherit; font-size: 1.3rem; text-transform: uppercase; text-align: center; margin-bottom: 0;">Official Resolution Log</h2>
+                <hr style="margin: 1rem 0; border: 1px dashed #ccc;">
+                <p id="receiptData" style="font-size: 1rem; color: #333; line-height: 1.8; text-align: left; background: #fafafa; padding: 15px; border-radius: 4px; border: 1px solid #eee;"></p>
+                <hr style="margin: 1rem 0; border: 1px dashed #ccc;">
+                <p style="font-size: 0.8rem; color: #777; text-align: center; margin-top: 10px;">Generated automatically by DIET Resolution System</p>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeModal('receiptModal')" style="flex: 1; justify-content: center;">Close Mode</button>
+                <button class="btn btn-primary" onclick="downloadReceipt()" style="flex: 2; justify-content: center; background: var(--secondary-color);"><i class="fas fa-download"></i> Download PDF Receipt</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Operation successful!</div>
+
+    <footer>
+        <p>&copy; 2026 Dhanekula Institute of Engineering & Technology. All rights reserved.</p>
+        <p class="footer-sub">Lost Item Recovery System</p>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

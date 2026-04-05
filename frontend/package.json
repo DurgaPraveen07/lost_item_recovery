@@ -1,0 +1,26 @@
+{
+  "name": "lost-item-frontend",
+  "version": "1.0.0",
+  "description": "Premium Lost & Found Frontend for Dhanekula Institute",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve",
+    "dev": "npx serve",
+    "preview": "open index.html"
+  },
+  "keywords": [
+    "frontend",
+    "lost-and-found",
+    "html",
+    "css",
+    "javascript"
+  ],
+  "author": "Durga Praveen",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
